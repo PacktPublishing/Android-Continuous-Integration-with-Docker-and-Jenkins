@@ -1,0 +1,4 @@
+docker run -it --rm -v $(pwd)/sdk:/sdk android-sdk bash -c 'cp -a $ANDROID_HOME/. /sdk'
+docker run -it -v $(pwd)/sdk:/opt/android-sdk android-sdk /bin/bash
+sdkmanager --list | grep patcher
+sdkmanager "patcher;v4"

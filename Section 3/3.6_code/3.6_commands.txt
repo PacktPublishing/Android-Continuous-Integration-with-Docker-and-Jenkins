@@ -1,0 +1,7 @@
+docker build -t android-sdk-emu .
+docker run -d -p 2222:22 -p 5901:5901 android-sdk-emu
+sdkmanager --list
+sdkmanager "emulator" "platform-tools" "platforms;android-24" "system-images;android-24;default;armeabi-v7a"
+echo "no" | avdmanager create avd -n test -k "system-images;android-24;default;armeabi-v7a"
+avdmanager list avd
+emulator64-arm -avd test -noaudio -no-boot-anim -accel on -gpu swiftshader_indirect &

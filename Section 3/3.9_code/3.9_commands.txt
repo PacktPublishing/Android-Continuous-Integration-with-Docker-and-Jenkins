@@ -1,0 +1,17 @@
+# build the gradle mirror server image
+docker build --build-arg GRADLE_DOWNLOAD_AMOUNT=0 -t gradle-server gradle-server
+# launch a gradle mirror server container
+docker run -d -p 80:80 -p 443:443 -v $(pwd)/gradle-server/distributions:/var/www/gradle.org/public_html/distributions --name gradle-server gradle-server
+# access it by:
+http://localhost/distributions/
+
+# launch an Android SDK container
+docker run -d -p 2222:22 -v $(pwd)/gradle/caches:/root/.gradle/caches --name android-sdk android-sdk
+# copy the SSL certificate from gradle server container to host machine
+docker cp gradle-server:/etc/apache2/ssl/apache.crt apache.crt
+# copy the SSL certificate from host machine to AndroidSDK container
+docker cp apache.crt android-sdk:/home/apache.crt
+# add self-signed SSL certificate to Java keystore
+docker exec -it android-sdk bash -c '$JAVA_HOME/bin/keytool -import -trustcacerts -file /home/apache.crt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt'
+# map gradle services domain to your local IP
+docker exec -it android-sdk bash -c 'echo "[YOUR_HOST_IP_ADDRESS_FOR_GRADLE_CONTAINER] services.gradle.org" >> /etc/hosts'
